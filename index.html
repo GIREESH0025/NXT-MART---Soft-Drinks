@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NXT-MART — Premium Spirits</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       AGE VERIFICATION OVERLAY
+       Shows on first visit; stores confirmation in localStorage
+       ============================================================ -->
+  <div id="ageOverlay">
+    <!-- Cinematic looping background video -->
+    <video id="ageBg" autoplay muted loop playsinline
+      src="https://videos.pexels.com/video-files/2795404/2795404-uhd_2560_1440_25fps.mp4">
+    </video>
+
+    <!-- Glassmorphism card -->
+    <div class="age-card">
+      <div class="age-logo">NXT-MART</div>
+      <div class="age-tagline">Premium Spirits Boutique</div>
+
+      <div class="age-icon">🥃</div>
+      <div class="age-title">Are you 18 or older?</div>
+      <div class="age-subtitle">
+        This website contains alcohol-related content.<br>
+        Please confirm your age to continue.
+      </div>
+
+      <div class="age-buttons">
+        <button id="btnYes" class="btn-yes">✓ Yes, I'm 18+</button>
+        <button id="btnNo"  class="btn-no">✕ No</button>
+      </div>
+
+      <div id="ageError" class="age-error"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       NAVBAR
+       Sticky with blur + scroll shadow effect
+       ============================================================ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">NXT<span>-MART</span></a>
+
+      <div class="nav-right">
+        <input type="text" id="searchInput" placeholder="Search spirits...">
+
+        <!-- Cart button with animated badge -->
+        <button id="cartBtn" aria-label="Open cart">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+          <span id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       MAIN LAYOUT — Sidebar + Products
+       ============================================================ -->
+  <main class="main-layout">
+
+    <!-- SIDEBAR FILTERS -->
+    <aside class="sidebar">
+      <div class="filter-card">
+        <div class="filter-title">Filters</div>
+
+        <!-- Price Range -->
+        <div class="filter-section">
+          <span class="filter-label">Price Range</span>
+          <input type="range" id="priceRange" min="0" max="200" value="200">
+          <div class="price-display">Up to <span id="priceValue">₹200</span></div>
+        </div>
+
+        <!-- Category -->
+        <div class="filter-section">
+          <span class="filter-label">Category</span>
+          <div id="categoryFilter">
+            <!-- Dynamically populated by JS -->
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div class="filter-section">
+          <span class="filter-label">Min Rating</span>
+          <div style="display:flex; flex-direction:column; gap:0.25rem;">
+            <label class="rating-label">
+              <input type="checkbox" class="ratingFilter" value="5"> ★★★★★ 5 stars
+            </label>
+            <label class="rating-label">
+              <input type="checkbox" class="ratingFilter" value="4"> ★★★★☆ 4+ stars
+            </label>
+            <label class="rating-label">
+              <input type="checkbox" class="ratingFilter" value="3"> ★★★☆☆ 3+ stars
+            </label>
+          </div>
+        </div>
+
+        <button id="resetFilters" class="reset-btn">Reset Filters</button>
+      </div>
+    </aside>
+
+    <!-- PRODUCTS SECTION -->
+    <section>
+      <div class="products-header">
+        <div>
+          <div class="products-title">Our Collection</div>
+          <div class="products-count" id="productCount">Loading...</div>
+        </div>
+        <select id="sortSelect">
+          <option value="default">Sort: Default</option>
+          <option value="price-low">Price: Low → High</option>
+          <option value="price-high">Price: High → Low</option>
+          <option value="rating">Rating: Best First</option>
+          <option value="newest">Newest First</option>
+        </select>
+      </div>
+
+      <!-- Products Grid (populated by JS) -->
+      <div id="productsGrid"></div>
+
+      <!-- No results message -->
+      <div id="noProducts">
+        <div class="no-icon">🔍</div>
+        <p>No products match your filters.<br>Try adjusting your search.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============================================================
+       CART MODAL (slide-up from bottom)
+       ============================================================ -->
+  <div id="cartOverlay" class="modal-overlay">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <span class="modal-title">Your Cart</span>
+        <button id="closeCart" class="modal-close">✕</button>
+      </div>
+
+      <div class="cart-body" id="cartItems">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="cart-footer">
+        <div class="cart-total-row">
+          <span class="cart-total-label">Total</span>
+          <span class="cart-total-amount" id="cartTotal">$0.00</span>
+        </div>
+        <button id="checkoutBtn" class="checkout-btn">Proceed to Checkout →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       CHECKOUT MODAL (center scale-in)
+       ============================================================ -->
+  <div id="checkoutOverlay" class="modal-overlay">
+    <div class="modal-panel" style="max-width:480px; border-radius:18px;">
+      <div class="modal-header">
+        <span class="modal-title">Checkout</span>
+        <button id="closeCheckout" class="modal-close">✕</button>
+      </div>
+
+      <form id="checkoutForm" class="checkout-body" novalidate>
+
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" placeholder="Arjun Sharma" autocomplete="name">
+          <div class="form-error"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+          <div class="form-error"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Street Address</label>
+          <input type="text" id="address" placeholder="123 Main Street" autocomplete="street-address">
+          <div class="form-error"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" placeholder="Chennai" autocomplete="address-level2">
+            <div class="form-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="zipCode">Zip Code</label>
+            <input type="text" id="zipCode" placeholder="600001" autocomplete="postal-code">
+            <div class="form-error"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cardNumber">Card Number</label>
+          <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
+          <div class="form-error"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="expiry">Expiry</label>
+            <input type="text" id="expiry" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp">
+            <div class="form-error"></div>
+          </div>
+          <div class="form-group">
+            <label for="cvv">CVV</label>
+            <input type="text" id="cvv" placeholder="123" maxlength="3" autocomplete="cc-csc">
+            <div class="form-error"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">Complete Purchase ✓</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       SUCCESS MODAL
+       ============================================================ -->
+  <div id="successOverlay" class="modal-overlay" style="align-items:center;">
+    <div class="modal-panel" style="max-width:420px; border-radius:18px; text-align:center; padding:3rem 2rem;">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">Order Placed!</div>
+      <div class="success-order" id="orderNumber">Your spirits are on the way.</div>
+      <button id="closeSuccess" class="continue-btn">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       TOAST NOTIFICATION CONTAINER
+       ============================================================ -->
+  <div id="toastContainer"></div>
+
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
+  <script src="script.js"></script>
+
+</body>
+</html>
