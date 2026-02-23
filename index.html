@@ -4,122 +4,606 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NXT-MART — Premium Soft Drinks & Mocktails</title>
+  <meta name="description" content="India's most premium soft drinks & mocktail delivery. Free delivery on orders above ₹299.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23111'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='38' font-family='Arial Black,sans-serif' fill='%23fff' letter-spacing='-2'>N</text><rect x='8' y='52' width='48' height='4' rx='2' fill='%2322d3ee'/></svg>">
+  <link rel="shortcut icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23111'/><text x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='38' font-family='Arial Black,sans-serif' fill='%23fff' letter-spacing='-2'>N</text><rect x='8' y='52' width='48' height='4' rx='2' fill='%2322d3ee'/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,300;1,9..144,700&family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- ============================================================
-       NAVBAR
-       Sticky with blur + scroll shadow effect
-       ============================================================ -->
+  <div id="offlineOverlay" class="offline-overlay" style="display:none">
+    <div class="offline-inner">
+      <div class="offline-header">
+        <div class="offline-title">📡 You're Offline</div>
+        <div class="offline-sub">While you wait, play Soda Rush!</div>
+      </div>
+      <canvas id="gameCanvas" width="560" height="220"></canvas>
+      <div class="offline-score-row">
+        <span>Score: <b id="gameScore">0</b></span>
+        <span>Best: <b id="gameBest">0</b></span>
+        <button id="gameRestartBtn" class="game-restart-btn">↺ Restart</button>
+      </div>
+      <div class="offline-hint">Press <kbd>Space</kbd> or tap to jump</div>
+    </div>
+  </div>
+
   <nav id="navbar">
     <div class="nav-inner">
-      <a href="#" class="nav-brand">NXT<span>-MART</span></a>
+      <a href="#" class="nav-brand" aria-label="NXT-MART Home">NXT<span>—MART</span></a>
+
+      <div class="nav-links">
+        <a href="#hero"       class="nav-link">Home</a>
+        <a href="#categories" class="nav-link">Drinks</a>
+        <a href="#offers"     class="nav-link">Offers</a>
+        <a href="#reviews"    class="nav-link">Reviews</a>
+      </div>
 
       <div class="nav-right">
-        <input type="text" id="searchInput" placeholder="Search drinks...">
-
-        <!-- Cart button with animated badge -->
-        <button id="cartBtn" aria-label="Open cart">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 01-8 0"/>
-          </svg>
-          <span id="cartCount">0</span>
+        <button class="nav-icon-btn" id="searchToggle" aria-label="Search">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
+
+        <button class="nav-icon-btn nav-auth-btn" id="navAuthBtn" aria-label="Sign In" title="Sign In">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+
+        <div class="profile-anchor" id="profileAnchor" style="display:none">
+          <button class="nav-avatar-btn" id="profileBtn" aria-label="Profile" aria-expanded="false">
+            <span id="navAvatarInitials">JD</span>
+            <div class="avatar-ring"></div>
+          </button>
+          <div class="profile-panel" id="profilePanel" role="dialog" aria-label="Profile">
+            <div class="profile-header">
+              <div class="profile-avatar-lg" id="profileAvatarLg">JD</div>
+              <div class="profile-info">
+                <div class="profile-name" id="profileName">John Doe</div>
+                <div class="profile-contact" id="profileContact">user@example.com</div>
+              </div>
+            </div>
+            <div class="profile-stats-row">
+              <div class="profile-stat-box">
+                <span class="pstat-num" id="profileCartCount">0</span>
+                <span class="pstat-label">Cart Items</span>
+              </div>
+              <div class="profile-stat-box">
+                <span class="pstat-num">0</span>
+                <span class="pstat-label">Orders</span>
+              </div>
+              <div class="profile-stat-box">
+                <span class="pstat-num">4.8</span>
+                <span class="pstat-label">Rating</span>
+              </div>
+            </div>
+            <div class="profile-section">
+              <div class="profile-section-title">Recent Orders</div>
+              <div class="profile-orders-placeholder">
+                <div class="order-placeholder-icon">📦</div>
+                <p>No orders yet.<br>Start shopping!</p>
+              </div>
+            </div>
+            <button class="profile-logout-btn" id="profileLogoutBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Sign Out
+            </button>
+          </div>
+        </div>
+
+        <button id="cartBtn" class="nav-icon-btn cart-nav-btn" aria-label="Open cart">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          <span id="cartCount" class="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="nav-search-bar" id="navSearchBar">
+      <div class="nav-search-inner">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="searchInput" placeholder="Search drinks, mojitos, energy..." autocomplete="off" aria-label="Search products">
+        <button class="search-close-btn" id="searchClose" aria-label="Close search">✕</button>
+      </div>
+      <div class="search-suggestions" id="searchSuggestions">
+        <div class="search-popular-section">
+          <div class="search-popular-label">🔥 Popular Searches</div>
+          <div class="search-chips">
+            <button class="search-chip" data-q="Coca-Cola">Coca-Cola</button>
+            <button class="search-chip" data-q="Thums Up">Thums Up</button>
+            <button class="search-chip" data-q="Virgin Mojito">Virgin Mojito</button>
+            <button class="search-chip" data-q="Red Bull">Red Bull</button>
+            <button class="search-chip" data-q="Mango">Mango</button>
+            <button class="search-chip" data-q="Energy">Energy</button>
+            <button class="search-chip" data-q="Mocktails">Mocktails</button>
+          </div>
+        </div>
+        <div class="search-trending-section">
+          <div class="search-popular-label">🆕 Trending Now</div>
+          <div class="search-trending-list">
+            <div class="search-trend-item" data-q="Strawberry Mojito"><span>🍓</span><span>Strawberry Mojito</span><span class="trend-arrow">↗</span></div>
+            <div class="search-trend-item" data-q="Blue Lagoon"><span>🌊</span><span>Blue Lagoon</span><span class="trend-arrow">↗</span></div>
+            <div class="search-trend-item" data-q="Monster"><span>⚡</span><span>Monster Energy</span><span class="trend-arrow">↗</span></div>
+          </div>
+        </div>
+        <div class="search-results-section" id="searchResultsList" style="display:none"></div>
+        <div class="search-recents-section" id="searchRecentsSection" style="display:none">
+          <div class="search-popular-label">🕒 Recent Searches</div>
+          <div class="search-recents-list" id="searchRecentsList"></div>
+        </div>
       </div>
     </div>
   </nav>
 
-  <!-- ============================================================
-       MAIN LAYOUT — Sidebar + Products
-       ============================================================ -->
-  <main class="main-layout">
+  <section id="hero" class="hero">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="hero-aurora"></div>
+    <canvas id="heroParticles" class="hero-particles-canvas" aria-hidden="true"></canvas>
 
-    <!-- SIDEBAR FILTERS -->
-    <aside class="sidebar">
-      <div class="filter-card">
-        <div class="filter-title">Filters</div>
-
-        <!-- Price Range -->
-        <div class="filter-section">
-          <span class="filter-label">Price Range</span>
-          <input type="range" id="priceRange" min="0" max="500" value="500">
-          <div class="price-display">Up to <span id="priceValue">₹500</span></div>
+    <div class="hero-layout">
+      <div class="hero-text">
+        <div class="hero-tag reveal-up">
+          <span class="hero-tag-dot"></span>
+          Premium Collection · India's Finest
         </div>
-
-        <!-- Category -->
-        <div class="filter-section">
-          <span class="filter-label">Category</span>
-          <div id="categoryFilter">
-            <!-- Dynamically populated by JS -->
+        <h1 class="hero-title reveal-up" style="--d:0.08s">
+          Crafted for
+          <br>
+          <span class="hero-title-accent">
+            <span class="hero-word" data-words="Euphoria,Luxury,Bliss,Thirst">Euphoria</span>
+          </span>
+        </h1>
+        <p class="hero-sub reveal-up" style="--d:0.16s">
+          Premium soft drinks & artisan mocktails — curated for the discerning palate. Free delivery on orders above ₹299.
+        </p>
+        <div class="hero-actions reveal-up" style="--d:0.24s">
+          <a href="#shop" class="btn-primary">
+            <span>Shop Now</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <a href="#categories" class="btn-ghost">Explore Categories</a>
+        </div>
+        <div class="hero-stats reveal-up" style="--d:0.32s">
+          <div class="hero-stat">
+            <span class="stat-num counter-up" data-target="22">0</span><span class="stat-suffix">+</span>
+            <small class="stat-label">Premium Drinks</small>
+          </div>
+          <div class="hero-stat-div"></div>
+          <div class="hero-stat">
+            <span class="stat-num">4.8★</span>
+            <small class="stat-label">Average Rating</small>
+          </div>
+          <div class="hero-stat-div"></div>
+          <div class="hero-stat">
+            <span class="stat-num">30min</span>
+            <small class="stat-label">Express Delivery</small>
           </div>
         </div>
+      </div>
 
-        <!-- Rating -->
-        <div class="filter-section">
-          <span class="filter-label">Min Rating</span>
-          <div style="display:flex; flex-direction:column; gap:0.25rem;">
-            <label class="rating-label">
-              <input type="checkbox" class="ratingFilter" value="5"> ★★★★★ 5 stars
-            </label>
-            <label class="rating-label">
-              <input type="checkbox" class="ratingFilter" value="4"> ★★★★☆ 4+ stars
-            </label>
-            <label class="rating-label">
-              <input type="checkbox" class="ratingFilter" value="3"> ★★★☆☆ 3+ stars
-            </label>
+      <div class="hero-visual reveal-right">
+        <div class="hero-product-scene" id="heroProductScene">
+          <div class="hps-aura hps-aura-1"></div>
+          <div class="hps-aura hps-aura-2"></div>
+          <div class="hps-ring hps-ring-1"></div>
+          <div class="hps-ring hps-ring-2"></div>
+          <div class="hps-ring hps-ring-3"></div>
+          <div class="hps-card">
+            <div class="hps-card-inner">
+              <img src="https://raw.githubusercontent.com/GIREESH0025/NXT-MART---Soft-Drinks/main/images/Strawberry%20Mojito.jpg"
+                   alt="Strawberry Mojito"
+                   class="hps-product-img"
+                   loading="eager">
+              <div class="hps-card-shine"></div>
+              <div class="hps-card-reflection"></div>
+            </div>
+          </div>
+          <div class="hps-badge hps-badge-1">No Preservatives ✓</div>
+          <div class="hps-badge hps-badge-2">Artisan Crafted ✓</div>
+          <div class="hps-badge hps-badge-3">₹40 onwards</div>
+          <div class="hps-float hps-float-1" aria-hidden="true">🍹</div>
+          <div class="hps-float hps-float-2" aria-hidden="true">🌿</div>
+          <div class="hps-float hps-float-3" aria-hidden="true">✨</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint" aria-hidden="true">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <div class="marquee-wrap" aria-hidden="true">
+    <div class="marquee-track">
+      <span>🥤 Free Delivery Over ₹299</span>
+      <span>⭐ 4.8 Rating · 20K+ Happy Customers</span>
+      <span>🍋 Fresh Mocktails Daily</span>
+      <span>⚡ 30-Min Express Delivery</span>
+      <span>🎉 New: Strawberry Mojito is here</span>
+      <span>🏆 India's #1 Premium Drink Store</span>
+      <span>🥤 Free Delivery Over ₹299</span>
+      <span>⭐ 4.8 Rating · 20K+ Happy Customers</span>
+      <span>🍋 Fresh Mocktails Daily</span>
+      <span>⚡ 30-Min Express Delivery</span>
+      <span>🎉 New: Strawberry Mojito is here</span>
+      <span>🏆 India's #1 Premium Drink Store</span>
+    </div>
+  </div>
+
+  <section id="categories" class="section categories-section">
+    <div class="section-inner">
+      <div class="section-label reveal-up">Browse by Category</div>
+      <h2 class="section-title reveal-up" style="--d:0.08s">Every Craving, <em>Covered</em></h2>
+      <div class="categories-grid" id="categoriesSlider">
+        <div class="cat-card reveal-up" style="--d:0s"    data-category="Cola Drinks">      <div class="cat-icon" aria-hidden="true">🥤</div><div class="cat-name">Cola Drinks</div><div class="cat-count">3 items</div><div class="cat-glow"></div></div>
+        <div class="cat-card reveal-up" style="--d:0.04s" data-category="Lemon Drinks">     <div class="cat-icon" aria-hidden="true">🍋</div><div class="cat-name">Lemon Drinks</div><div class="cat-count">2 items</div><div class="cat-glow"></div></div>
+        <div class="cat-card reveal-up" style="--d:0.08s" data-category="Carbonated Drinks"><div class="cat-icon" aria-hidden="true">✨</div><div class="cat-name">Carbonated</div><div class="cat-count">2 items</div><div class="cat-glow"></div></div>
+        <div class="cat-card reveal-up" style="--d:0.12s" data-category="Fruit Drinks">    <div class="cat-icon" aria-hidden="true">🍊</div><div class="cat-name">Fruit Drinks</div><div class="cat-count">4 items</div><div class="cat-glow"></div></div>
+        <div class="cat-card reveal-up" style="--d:0.16s" data-category="Energy Drinks">   <div class="cat-icon" aria-hidden="true">⚡</div><div class="cat-name">Energy Drinks</div><div class="cat-count">3 items</div><div class="cat-glow"></div></div>
+        <div class="cat-card reveal-up" style="--d:0.20s" data-category="Mocktails">       <div class="cat-icon" aria-hidden="true">🍹</div><div class="cat-name">Mocktails</div><div class="cat-count">5 items</div><div class="cat-glow"></div></div>
+        <div class="cat-card reveal-up" style="--d:0.24s" data-category="Soda & Mixers">   <div class="cat-icon" aria-hidden="true">🫧</div><div class="cat-name">Soda & Mixers</div><div class="cat-count">3 items</div><div class="cat-glow"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="shop" class="section shop-section">
+    <div class="section-inner">
+      <div class="section-label reveal-up">Our Collection</div>
+      <h2 class="section-title reveal-up" style="--d:0.08s">Refreshing <em>Collection</em></h2>
+    </div>
+
+    <div class="shop-layout">
+      <aside class="sidebar">
+        <div class="filter-card">
+          <div class="filter-title">Refine</div>
+          <div class="filter-section">
+            <span class="filter-label">Price Range</span>
+            <input type="range" id="priceRange" min="0" max="500" value="500" aria-label="Price range up to ₹500">
+            <div class="price-display">Up to <strong id="priceValue">₹500</strong></div>
+          </div>
+          <div class="filter-section">
+            <span class="filter-label">Category</span>
+            <div id="categoryFilter"></div>
+          </div>
+          <div class="filter-section">
+            <span class="filter-label">Min Rating</span>
+            <div class="rating-filters">
+              <label class="rating-label"><input type="checkbox" class="ratingFilter" value="5"> ★★★★★ 5 stars</label>
+              <label class="rating-label"><input type="checkbox" class="ratingFilter" value="4"> ★★★★☆ 4+ stars</label>
+              <label class="rating-label"><input type="checkbox" class="ratingFilter" value="3"> ★★★☆☆ 3+ stars</label>
+            </div>
+          </div>
+          <button id="resetFilters" class="reset-btn">↺ Reset Filters</button>
+        </div>
+      </aside>
+
+      <section class="products-section" aria-label="Products">
+        <div class="products-header">
+          <div class="products-meta">
+            <div class="products-title">All Drinks</div>
+            <div class="products-count" id="productCount">22 drinks found</div>
+          </div>
+          <div class="products-sort">
+            <select id="sortSelect" aria-label="Sort products">
+              <option value="default">Sort: Featured</option>
+              <option value="price-low">Price: Low → High</option>
+              <option value="price-high">Price: High → Low</option>
+              <option value="rating">Highest Rated</option>
+              <option value="newest">Newest First</option>
+            </select>
           </div>
         </div>
-
-        <button id="resetFilters" class="reset-btn">Reset Filters</button>
-      </div>
-    </aside>
-
-    <!-- PRODUCTS SECTION -->
-    <section>
-      <div class="products-header">
-        <div>
-          <div class="products-title">Refreshing Collection</div>
-          <div class="products-count" id="productCount">Loading...</div>
+        <div class="products-grid" id="productsGrid" role="list"></div>
+        <div class="no-products" id="noProducts" style="display:none" role="status">
+          <div class="no-products-icon">🔍</div>
+          <p>No drinks match your filters.<br>Try adjusting your search.</p>
         </div>
-        <select id="sortSelect">
-          <option value="default">Sort: Default</option>
-          <option value="price-low">Price: Low → High</option>
-          <option value="price-high">Price: High → Low</option>
-          <option value="rating">Rating: Best First</option>
-          <option value="newest">Newest First</option>
-        </select>
+      </section>
+    </div>
+  </section>
+
+  <section id="offers" class="section offers-section">
+    <div class="section-inner">
+      <div class="section-label reveal-up">Limited Time</div>
+      <h2 class="section-title reveal-up" style="--d:0.08s">Today's <em>Offers</em></h2>
+    </div>
+    <div class="offers-grid">
+      <div class="offer-card offer-card-large reveal-up" style="--d:0s">
+        <div class="offer-badge">30% OFF</div>
+        <div class="offer-emoji" aria-hidden="true">🍹</div>
+        <div class="offer-body">
+          <div class="offer-title">All Mocktails</div>
+          <div class="offer-sub">Artisan crafted · Limited stock</div>
+          <div class="offer-timer" aria-live="polite">
+            <span class="timer-unit"><b id="t1h">08</b><small>hrs</small></span>
+            <span class="timer-sep">:</span>
+            <span class="timer-unit"><b id="t1m">42</b><small>min</small></span>
+            <span class="timer-sep">:</span>
+            <span class="timer-unit"><b id="t1s">16</b><small>sec</small></span>
+          </div>
+          <button class="offer-btn" onclick="filterByCategory('Mocktails')">Grab Deal →</button>
+        </div>
+        <div class="offer-glow"></div>
+      </div>
+      <div class="offer-card reveal-up" style="--d:0.1s">
+        <div class="offer-badge offer-badge-blue">BUY 3</div>
+        <div class="offer-emoji" aria-hidden="true">⚡</div>
+        <div class="offer-body">
+          <div class="offer-title">Energy Drinks</div>
+          <div class="offer-sub">Pay for 2 only</div>
+          <button class="offer-btn offer-btn-blue" onclick="filterByCategory('Energy Drinks')">Shop Now →</button>
+        </div>
+        <div class="offer-glow offer-glow-blue"></div>
+      </div>
+      <div class="offer-card reveal-up" style="--d:0.15s">
+        <div class="offer-badge offer-badge-green">FREE</div>
+        <div class="offer-emoji" aria-hidden="true">🚀</div>
+        <div class="offer-body">
+          <div class="offer-title">Express Delivery</div>
+          <div class="offer-sub">Orders above ₹299</div>
+          <button class="offer-btn offer-btn-green" onclick="document.getElementById('shop').scrollIntoView({behavior:'smooth'})">Order Now →</button>
+        </div>
+        <div class="offer-glow offer-glow-green"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reviews" class="section reviews-section">
+    <div class="section-inner">
+      <div class="section-label reveal-up">What Customers Say</div>
+      <h2 class="section-title reveal-up" style="--d:0.08s">Loved by <em>Thousands</em></h2>
+      <div class="reviews-rating-summary reveal-up" style="--d:0.16s">
+        <div class="summary-score">4.8</div>
+        <div class="summary-stars" aria-label="4.8 out of 5 stars">★★★★★</div>
+        <div class="summary-label">Based on 24,800+ reviews</div>
+      </div>
+    </div>
+    <div class="reviews-carousel" id="reviewsCarousel">
+      <div class="reviews-track" id="reviewsTrack">
+        <div class="review-card">
+          <div class="review-stars" aria-label="5 stars">★★★★★</div>
+          <p class="review-text">"The Virgin Mojito is absolutely stunning — fresh, perfectly balanced, and arrives ice-cold. Worth every rupee!"</p>
+          <div class="review-author">
+            <div class="review-avatar">AR</div>
+            <div><div class="review-name">Arjun Reddy</div><div class="review-loc">Chennai, Tamil Nadu</div></div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars" aria-label="5 stars">★★★★★</div>
+          <p class="review-text">"Ordered Maaza and Red Bull together. Delivered in 28 minutes, colder than expected. The packaging is premium — feels like a gift."</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe)">PR</div>
+            <div><div class="review-name">Priya Rajan</div><div class="review-loc">Bengaluru, Karnataka</div></div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars" aria-label="4 stars">★★★★☆</div>
+          <p class="review-text">"Finally a drinks store that feels premium. The Blue Lagoon mocktail is Insta-worthy. NXT-MART is my go-to now."</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#f093fb,#f5576c)">SK</div>
+            <div><div class="review-name">Sneha Kumar</div><div class="review-loc">Mumbai, Maharashtra</div></div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars" aria-label="5 stars">★★★★★</div>
+          <p class="review-text">"The Strawberry Mojito is a work of art. Perfectly chilled, beautiful colour, and the taste is restaurant-quality. 10/10!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#43e97b,#38f9d7)">VM</div>
+            <div><div class="review-name">Vikram Menon</div><div class="review-loc">Hyderabad, Telangana</div></div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars" aria-label="5 stars">★★★★★</div>
+          <p class="review-text">"Love the filter system! Found exactly what I wanted in seconds. Express delivery was actually 25 minutes. Impressed!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#fa709a,#fee140)">AK</div>
+            <div><div class="review-name">Ananya Krishnan</div><div class="review-loc">Pune, Maharashtra</div></div>
+          </div>
+        </div>
+        <div class="review-card">
+          <div class="review-stars" aria-label="5 stars">★★★★★</div>
+          <p class="review-text">"Monster Energy and Thums Up arrived together in a beautiful box. This site is miles ahead of other delivery apps. Deserves 6 stars!"</p>
+          <div class="review-author">
+            <div class="review-avatar" style="background:linear-gradient(135deg,#a18cd1,#fbc2eb)">RS</div>
+            <div><div class="review-name">Rohan Sharma</div><div class="review-loc">Delhi, NCR</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reviews-dots" id="reviewsDots" aria-label="Review navigation"></div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand-col">
+        <div class="footer-logo">NXT<span>—MART</span></div>
+        <p class="footer-tagline">India's most premium soft drinks &amp; mocktail delivery experience.</p>
+        <div class="footer-social">
+          <a href="#" class="social-link" aria-label="Instagram">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="Twitter">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
+          </a>
+          <a href="#" class="social-link" aria-label="YouTube">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Shop</div>
+        <a href="#" class="footer-link" onclick="filterByCategory('Cola Drinks');return false">Cola Drinks</a>
+        <a href="#" class="footer-link" onclick="filterByCategory('Mocktails');return false">Mocktails</a>
+        <a href="#" class="footer-link" onclick="filterByCategory('Energy Drinks');return false">Energy Drinks</a>
+        <a href="#" class="footer-link" onclick="filterByCategory('Fruit Drinks');return false">Fruit Drinks</a>
+        <a href="#" class="footer-link" onclick="filterByCategory('Soda & Mixers');return false">Soda & Mixers</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Company</div>
+        <a href="#" class="footer-link">About Us</a>
+        <a href="#" class="footer-link">Careers</a>
+        <a href="#" class="footer-link">Blog</a>
+        <a href="#" class="footer-link">Press</a>
+        <a href="#" class="footer-link">Contact</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Support</div>
+        <a href="#" class="footer-link">Track Order</a>
+        <a href="#" class="footer-link">Returns Policy</a>
+        <a href="#" class="footer-link">FAQ</a>
+        <a href="#" class="footer-link">Privacy Policy</a>
+        <a href="#" class="footer-link">Terms of Service</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-bottom-inner">
+        <div class="footer-copy">© 2026 NXT-MART. All rights reserved. Made with ♥ in India.</div>
+        <div class="footer-pay">
+          <span class="pay-badge">UPI</span>
+          <span class="pay-badge">Visa</span>
+          <span class="pay-badge">MC</span>
+          <span class="pay-badge">RuPay</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========== ENHANCED AUTH MODAL ========== -->
+  <div id="authOverlay" class="auth-fullscreen" role="dialog" aria-modal="true" aria-label="Authentication">
+    <canvas id="authParticleCanvas" class="auth-bg-canvas" aria-hidden="true"></canvas>
+
+    <div class="auth-orb auth-orb-1" aria-hidden="true"></div>
+    <div class="auth-orb auth-orb-2" aria-hidden="true"></div>
+    <div class="auth-orb auth-orb-3" aria-hidden="true"></div>
+
+    <div class="auth-glass-card" id="authGlassCard">
+      <button id="closeAuth" class="auth-dismiss-btn" aria-label="Continue as guest" style="display:none">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <div class="auth-logo-wrap">
+        <div class="auth-logo-ring" aria-hidden="true"></div>
+        <div class="auth-brand-text">NXT<span>—MART</span></div>
+      </div>
+      <p class="auth-tagline">India's most premium refreshment experience</p>
+
+      <div class="auth-tabs" role="tablist" id="authTabs">
+        <button class="auth-tab active" data-tab="signin" role="tab" aria-selected="true">Sign In</button>
+        <button class="auth-tab" data-tab="signup" role="tab" aria-selected="false">Sign Up</button>
+        <div class="auth-tab-bar"></div>
       </div>
 
-      <!-- Products Grid (populated by JS) -->
-      <div id="productsGrid"></div>
+      <!-- Sign In Form -->
+      <form class="auth-form" id="signinFormEl" data-panel="signin" novalidate autocomplete="on">
+        <div class="auth-fields">
+          <div class="floating-field">
+            <input type="email" id="si-email" name="email" required autocomplete="email" placeholder=" ">
+            <label for="si-email">Email or Mobile</label>
+            <span class="field-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </span>
+          </div>
+          <div class="floating-field password-wrap">
+            <input type="password" id="si-pass" name="password" required autocomplete="current-password" placeholder=" ">
+            <label for="si-pass">Password</label>
+            <span class="field-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </span>
+            <button type="button" class="pw-eye-btn" data-for="si-pass" aria-label="Toggle password visibility">
+              <svg class="eye-open" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-shut" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="auth-error" id="siError" role="alert"></div>
+        <button type="submit" class="auth-submit">
+          <span>Sign In</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <div class="auth-switch-row">Don't have an account? <button type="button" class="auth-link-btn" data-to="signup">Create one →</button></div>
+      </form>
 
-      <!-- No results message -->
-      <div id="noProducts">
-        <div class="no-icon">🔍</div>
-        <p>No drinks match your filters.<br>Try adjusting your search.</p>
-      </div>
-    </section>
+      <!-- Sign Up Form -->
+      <form class="auth-form auth-form-hidden" id="signupFormEl" data-panel="signup" novalidate autocomplete="on">
+        <div class="auth-fields">
+          <div class="floating-field">
+            <input type="text" id="su-name" name="name" required autocomplete="name" placeholder=" ">
+            <label for="su-name">Full Name</label>
+            <span class="field-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+          </div>
+          <div class="floating-field">
+            <input type="email" id="su-email" name="email" required autocomplete="email" placeholder=" ">
+            <label for="su-email">Email or Mobile</label>
+            <span class="field-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </span>
+          </div>
+          <div class="floating-field password-wrap">
+            <input type="password" id="su-pass" name="password" required autocomplete="new-password" placeholder=" ">
+            <label for="su-pass">Password</label>
+            <span class="field-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            </span>
+            <button type="button" class="pw-eye-btn" data-for="su-pass" aria-label="Toggle password visibility">
+              <svg class="eye-open" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-shut" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
 
-  </main>
+          <!-- Animated password strength meter -->
+          <div class="pw-strength-section">
+            <div class="pw-strength-bars" role="meter" aria-label="Password strength" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div class="pw-bar" data-i="0"></div>
+              <div class="pw-bar" data-i="1"></div>
+              <div class="pw-bar" data-i="2"></div>
+              <div class="pw-bar" data-i="3"></div>
+            </div>
+            <div class="pw-strength-footer">
+              <span class="pw-strength-label" id="pwStrengthLabel">Enter a password</span>
+              <span class="pw-strength-hints" id="pwStrengthHints"></span>
+            </div>
+          </div>
 
-  <!-- ============================================================
-       CART MODAL (slide-up from bottom)
-       ============================================================ -->
-  <div id="cartOverlay" class="modal-overlay">
+          <div class="floating-field password-wrap">
+            <input type="password" id="su-confirm" name="confirm" required autocomplete="new-password" placeholder=" ">
+            <label for="su-confirm">Confirm Password</label>
+            <span class="field-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+            <button type="button" class="pw-eye-btn" data-for="su-confirm" aria-label="Toggle password visibility">
+              <svg class="eye-open" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-shut" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="auth-error" id="suError" role="alert"></div>
+        <button type="submit" class="auth-submit">
+          <span>Create Account</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <div class="auth-switch-row">Already have an account? <button type="button" class="auth-link-btn" data-to="signin">Sign In →</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div id="quickViewOverlay" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-panel qv-panel">
+      <button id="closeQuickView" class="modal-close" aria-label="Close">✕</button>
+      <div id="quickViewContent"></div>
+    </div>
+  </div>
+
+  <div id="cartOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Shopping cart">
     <div class="modal-panel">
       <div class="modal-header">
         <span class="modal-title">Your Cart</span>
-        <button id="closeCart" class="modal-close">✕</button>
+        <button id="closeCart" class="modal-close" aria-label="Close cart">✕</button>
       </div>
-
-      <div class="cart-body" id="cartItems">
-        <!-- Populated by JS -->
-      </div>
-
+      <div class="cart-body" id="cartItems"></div>
       <div class="cart-footer">
         <div class="cart-total-row">
           <span class="cart-total-label">Total</span>
@@ -130,36 +614,28 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       CHECKOUT MODAL (center scale-in)
-       ============================================================ -->
-  <div id="checkoutOverlay" class="modal-overlay">
-    <div class="modal-panel" style="max-width:480px; border-radius:18px;">
+  <div id="checkoutOverlay" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Checkout">
+    <div class="modal-panel checkout-modal-panel">
       <div class="modal-header">
         <span class="modal-title">Checkout</span>
-        <button id="closeCheckout" class="modal-close">✕</button>
+        <button id="closeCheckout" class="modal-close" aria-label="Close checkout">✕</button>
       </div>
-
       <form id="checkoutForm" class="checkout-body" novalidate>
-
         <div class="form-group">
           <label for="fullName">Full Name</label>
           <input type="text" id="fullName" placeholder="Arjun Sharma" autocomplete="name">
           <div class="form-error"></div>
         </div>
-
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+          <input type="email" id="checkoutEmail" placeholder="you@example.com" autocomplete="email">
           <div class="form-error"></div>
         </div>
-
         <div class="form-group">
           <label for="address">Street Address</label>
           <input type="text" id="address" placeholder="123 Main Street" autocomplete="street-address">
           <div class="form-error"></div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label for="city">City</label>
@@ -172,13 +648,11 @@
             <div class="form-error"></div>
           </div>
         </div>
-
         <div class="form-group">
           <label for="cardNumber">Card Number</label>
           <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number">
           <div class="form-error"></div>
         </div>
-
         <div class="form-row">
           <div class="form-group">
             <label for="expiry">Expiry</label>
@@ -191,34 +665,27 @@
             <div class="form-error"></div>
           </div>
         </div>
-
         <button type="submit" class="submit-btn">Complete Purchase ✓</button>
       </form>
     </div>
   </div>
 
-  <!-- ============================================================
-       SUCCESS MODAL
-       ============================================================ -->
-  <div id="successOverlay" class="modal-overlay" style="align-items:center;">
-    <div class="modal-panel" style="max-width:420px; border-radius:18px; text-align:center; padding:3rem 2rem;">
-      <div class="success-icon">🎉</div>
+  <div id="successOverlay" class="modal-overlay" style="align-items:center">
+    <div class="modal-panel success-panel">
+      <div class="success-confetti" id="confetti" aria-hidden="true"></div>
+      <div class="success-icon" aria-hidden="true">🎉</div>
       <div class="success-title">Order Placed!</div>
       <div class="success-order" id="orderNumber">Your drinks are on the way!</div>
       <button id="closeSuccess" class="continue-btn">Continue Shopping</button>
     </div>
   </div>
 
-  <!-- ============================================================
-       TOAST NOTIFICATION CONTAINER
-       ============================================================ -->
-  <div id="toastContainer"></div>
+  <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- ============================================================
-       JAVASCRIPT
-       ============================================================ -->
+  <button id="scrollTop" class="scroll-top" aria-label="Scroll to top">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+  </button>
+
   <script src="script.js"></script>
-  
-
 </body>
 </html>
